@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Exceptions;
+package exceptions;
 
 /**
  *
  * @author oscar
  */
-public class PersonNotFoundException extends Exception {
-
-    public PersonNotFoundException(String message) {
+public class MissingInputException extends Exception {
+    public MissingInputException (String message) {
         super(message);
     }
 }
+

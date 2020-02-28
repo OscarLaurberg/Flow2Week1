@@ -1,11 +1,12 @@
 package rest;
 
-import Exceptions.PersonNotFoundException;
+import exceptions.PersonNotFoundException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dto.PersonDTO;
 import dto.PersonListDTO;
 import entities.Person;
+import exceptions.MissingInputException;
 import utils.EMF_Creator;
 import facades.PersonFacade;
 import java.util.List;
@@ -56,7 +57,7 @@ public class PersonResource {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public String addPerson(String json){
+    public String addPerson(String json) throws MissingInputException{
         PersonDTO persDTO = GSON.fromJson(json, PersonDTO.class);
         PersonDTO persistedPersDTO = FACADE.addPerson(persDTO.getfName(), persDTO.getlName(), persDTO.getPhone());
         return GSON.toJson(persistedPersDTO);
@@ -67,6 +68,9 @@ public class PersonResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String getPersonFromId(@PathParam("id") int id) throws PersonNotFoundException{
         PersonDTO persDTO = FACADE.getPerson(id);
+        if(persDTO == null){
+            throw new PersonNotFoundException("No person with providede id found");
+        }
         return GSON.toJson(persDTO);
     }
     
@@ -75,6 +79,9 @@ public class PersonResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String deletePerson(@PathParam("id") int id) throws PersonNotFoundException{
         PersonDTO persDTO = FACADE.deletePerson(id);
+        if(persDTO == null){
+            throw new PersonNotFoundException("Could not delete, providede id does not exist");
+        }
         return GSON.toJson(persDTO);
     }
     
@@ -82,6 +89,7 @@ public class PersonResource {
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
     public String getAllPersons(){
+        
         PersonListDTO allPersonDTOs = FACADE.getAllPersons();
         return GSON.toJson(allPersonDTOs);
         
@@ -91,7 +99,7 @@ public class PersonResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response editPerson (String json, @PathParam("id") Long id) throws PersonNotFoundException {
+    public Response editPerson (String json, @PathParam("id") Long id) throws MissingInputException {
         PersonDTO personDTO = GSON.fromJson(json, PersonDTO.class);
         personDTO.setId(id);
         return Response

@@ -1,9 +1,10 @@
 package facades;
 
-import Exceptions.PersonNotFoundException;
+import exceptions.PersonNotFoundException;
 import dto.PersonDTO;
 import dto.PersonListDTO;
 import entities.Person;
+import exceptions.MissingInputException;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -60,6 +61,8 @@ public class PersonFacade implements IPersonFacade {
             Person person = em.find(Person.class, (long) id);
             PersonDTO personDTO = new PersonDTO(person);
             return personDTO;
+        }catch(NullPointerException e){
+            throw new PersonNotFoundException("No person with provided id found");
         } finally {
             em.close();
         }
@@ -75,7 +78,7 @@ public class PersonFacade implements IPersonFacade {
     }
 
     @Override
-    public PersonDTO addPerson(String fName, String lName, String phone) {
+    public PersonDTO addPerson(String fName, String lName, String phone) throws MissingInputException {
         Person person = new Person(fName, lName, phone);
 
         EntityManager em = emf.createEntityManager();
@@ -84,6 +87,8 @@ public class PersonFacade implements IPersonFacade {
             em.persist(person);
             em.getTransaction().commit();
             return new PersonDTO(person);
+        }catch(Exception e){
+            throw new MissingInputException("First Name and/or Last Name is missing");
         } finally {
             em.close();
         }
@@ -99,13 +104,15 @@ public class PersonFacade implements IPersonFacade {
             em.remove(person);
             em.getTransaction().commit();
             return persDTO;
+     }catch(Exception e){
+            throw new PersonNotFoundException("No person with provided id found");
         } finally {
             em.close();
         }
     }
 
     @Override
-    public PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException {
+    public PersonDTO editPerson(PersonDTO p) throws MissingInputException {
         EntityManager em = getEntityManager();
         Person person = em.find(Person.class, p.getId());
         try {

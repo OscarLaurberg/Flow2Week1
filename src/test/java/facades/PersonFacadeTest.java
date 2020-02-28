@@ -1,9 +1,10 @@
 package facades;
 
-import Exceptions.PersonNotFoundException;
+import exceptions.PersonNotFoundException;
 import dto.PersonDTO;
 import utils.EMF_Creator;
 import entities.Person;
+import exceptions.MissingInputException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -100,7 +101,7 @@ public class PersonFacadeTest {
     }
     
     @Test
-    public void testAddPerson(){
+    public void testAddPerson()throws MissingInputException{
         int expected = facade.getAllPersons().getAll().size()+1;
         facade.addPerson("Test1", "Test2", "Test3");
         int result = facade.getAllPersons().getAll().size();
