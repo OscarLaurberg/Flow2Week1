@@ -61,7 +61,7 @@ public class PersonFacade implements IPersonFacade {
             Person person = em.find(Person.class, (long) id);
             PersonDTO personDTO = new PersonDTO(person);
             return personDTO;
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             throw new PersonNotFoundException("No person with provided id found");
         } finally {
             em.close();
@@ -83,12 +83,14 @@ public class PersonFacade implements IPersonFacade {
 
         EntityManager em = emf.createEntityManager();
         try {
+            if (person.getFirstName() == null || person.getLastName() == null) {
+                throw new MissingInputException("First Name and/or Last Name is missing");
+            }
             em.getTransaction().begin();
             em.persist(person);
             em.getTransaction().commit();
             return new PersonDTO(person);
-        }catch(Exception e){
-            throw new MissingInputException("First Name and/or Last Name is missing");
+
         } finally {
             em.close();
         }
@@ -97,22 +99,22 @@ public class PersonFacade implements IPersonFacade {
     @Override
     public PersonDTO deletePerson(int id) throws PersonNotFoundException {
         EntityManager em = getEntityManager();
+        try{
         Person person = em.find(Person.class, (long) id);
-        PersonDTO persDTO = new PersonDTO(person);
-        try {
+            PersonDTO persDTO = new PersonDTO(person);
             em.getTransaction().begin();
             em.remove(person);
             em.getTransaction().commit();
             return persDTO;
-     }catch(Exception e){
-            throw new PersonNotFoundException("No person with provided id found");
+        }catch (Exception e){
+            throw new PersonNotFoundException("Could not delete, provided id does not exist");
         } finally {
             em.close();
         }
     }
 
     @Override
-    public PersonDTO editPerson(PersonDTO p) throws MissingInputException {
+    public PersonDTO editPerson(PersonDTO p) throws PersonNotFoundException {
         EntityManager em = getEntityManager();
         Person person = em.find(Person.class, p.getId());
         try {
@@ -129,7 +131,8 @@ public class PersonFacade implements IPersonFacade {
             person.setLastEdited(new Date());
             em.getTransaction().commit();
             return new PersonDTO(person);
-
+        }catch (Exception e){
+            throw new PersonNotFoundException(("Could not edit, provided id does not exist"));
         } finally {
             em.close();
         }

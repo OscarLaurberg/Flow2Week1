@@ -76,12 +76,10 @@ public class PersonResource {
     
     @DELETE
     @Path("delete/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON})
     public String deletePerson(@PathParam("id") int id) throws PersonNotFoundException{
         PersonDTO persDTO = FACADE.deletePerson(id);
-        if(persDTO == null){
-            throw new PersonNotFoundException("Could not delete, providede id does not exist");
-        }
         return GSON.toJson(persDTO);
     }
     
@@ -99,7 +97,7 @@ public class PersonResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response editPerson (String json, @PathParam("id") Long id) throws MissingInputException {
+    public Response editPerson (String json, @PathParam("id") Long id) throws PersonNotFoundException {
         PersonDTO personDTO = GSON.fromJson(json, PersonDTO.class);
         personDTO.setId(id);
         return Response
