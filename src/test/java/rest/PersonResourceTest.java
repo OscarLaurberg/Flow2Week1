@@ -2,9 +2,11 @@ package rest;
 
 import dto.PersonDTO;
 import entities.Person;
+import exceptions.PersonNotFoundException;
 import utils.EMF_Creator;
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
 import java.net.URI;
@@ -130,6 +132,17 @@ public class PersonResourceTest {
                 .assertThat()
                 .body("fName", equalTo("Some txt"));
     }
+    
+    @Test
+    public void testGetPersonWithNonExistingId() {
+        long id = 100;
+        given().when()
+                .get("/Person/{id}",id)
+                .then()
+                .statusCode(404)
+                .body("code", equalTo(404),
+                        "message", equalTo("No person with provided id found"));
+    }
 
     @Test
     public void testDeletePerson() {
@@ -141,41 +154,81 @@ public class PersonResourceTest {
                 .statusCode(200)
                 .body("fName", is("Some txt"));
     }
-    
+
     @Test
-    public void testEditPerson(){
+    public void testDeletePersonWithNonExistingId() {
+        int id = 100;
+        when()
+                .delete("Person/delete/{id}", id)
+                .then()
+                .statusCode(404)
+                .body("code", equalTo(404),
+                        "message", equalTo("Could not delete, provided id does not exist"));
+    }
+
+    @Test
+    public void testEditPerson() {
         Long id = r1.getId();
         Map<String, String> content = new HashMap<>();
-        content.put("fName","updated");
-        
+        content.put("fName", "updated");
+
         given()
                 .contentType(ContentType.JSON)
                 .with()
                 .body(content)
                 .when()
-                .put("Person/{id}",id)
+                .put("Person/{id}", id)
                 .then()
                 .body("fName", is("updated"));
     }
-    
 
     @Test
-    public void testAddPerson(){
-        String jsonStr = "{\"fName\":\"testFName\",\"lName\":\"testLName\",\"phone\":\"123232\"}";
-        
-        Map<String, String> content = new HashMap<>();
-        content.put("fName","testFName");
-        content.put("lName","testLName");
-        content.put("phone","70121416");
-            given()
-                    .contentType(ContentType.JSON)
-                    .with()
-                    .body(new PersonDTO("testFName","testLName","123321"))
-                    .when()
-                    .post("/Person/add")
-                    .then()
-                    .body("fName", equalTo("testFName"),"lName",equalTo("testLName"));
+    public void testEditPersonWithNonExistingId() {
+        PersonDTO person = new PersonDTO("Niels", "Joe Joe", "4444");
+        int id = 100;
+        given()
+                .contentType("application/json")
+                .body(person)
+                .when()
+                .put("Person/{id}",id)
+                .then()
+                .statusCode(404)
+                .body("code", equalTo(404),
+                        "message", equalTo("Could not edit, provided id does not exist"));
     }
 
+
     
+    @Test
+    public void testAddPerson() {
+        String jsonStr = "{\"fName\":\"testFName\",\"lName\":\"testLName\",\"phone\":\"123232\"}";
+
+        Map<String, String> content = new HashMap<>();
+        content.put("fName", "testFName");
+        content.put("lName", "testLName");
+        content.put("phone", "70121416");
+        given()
+                .contentType(ContentType.JSON)
+                .with()
+                .body(new PersonDTO("testFName", "testLName", "123321"))
+                .when()
+                .post("/Person/add")
+                .then()
+                .body("fName", equalTo("testFName"), "lName", equalTo("testLName"));
+    }
+    
+    @Test
+    public void testAddPersonWithMissingInfo(){
+        PersonDTO person = new PersonDTO("Jewns", "", "36954310");
+        given()
+                .contentType("application/json")
+                .body(person)
+                .when()
+                .post("Person/add")
+                .then()
+                .body("code", equalTo(400),
+                        "message", equalTo("First Name and/or Last Name is missing"));
+    
+    }
+
 }
