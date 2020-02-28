@@ -13,9 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import utils.Settings;
 import utils.EMF_Creator.DbSelector;
 import utils.EMF_Creator.Strategy;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 //Uncomment the line below, to temporarily disable this test
 //@Disabled
@@ -94,6 +95,13 @@ public class PersonFacadeTest {
     }
     
     @Test
+    public void testGetPersonWithInvalidId(){
+        int id = 100;
+        assertThrows(PersonNotFoundException.class,() -> facade.getPerson(id));
+        
+    }
+    
+    @Test
     public void testGetPersons(){
         int expected = 2;
         int result = facade.getAllPersons().getAll().size();
@@ -109,12 +117,63 @@ public class PersonFacadeTest {
     }
     
     @Test
+    public void testAddPersonWithMissingFields()throws MissingInputException{
+        assertThrows(MissingInputException.class, () -> {
+            facade.addPerson(null, "Laurboss", "");
+        });
+    }
+    
+    @Test
+    public void testAddPersonWithEmptyFields()throws MissingInputException{
+        assertThrows(MissingInputException.class, () -> {
+            facade.addPerson("", "Laurboss", "");
+        });
+    }
+    
+    @Test
     public void testDeletePerson() throws PersonNotFoundException{
        int expected = facade.getAllPersons().getAll().size()-1;
        facade.deletePerson(pers1.getId().intValue());
        int result = facade.getAllPersons().getAll().size();
         assertEquals(expected, result);
     }
+    
+    @Test
+    public void testDeletePersonWithInvalidId() throws PersonNotFoundException{
+               int id = 100;
+        assertThrows(PersonNotFoundException.class,() -> facade.deletePerson(id));
+        
+    }
 
+    @Test
+    public void testEditPerson() throws PersonNotFoundException, MissingInputException{
+        PersonDTO persDTO = facade.addPerson("Crash","Bandicoot","80803030");
+        persDTO.setfName("Jones");
+        PersonDTO editedPersDTO = facade.editPerson(persDTO);
+        assertEquals("Jones", editedPersDTO.getfName());
+        assertEquals("80803030", editedPersDTO.getPhone());
+        assertEquals("Bandicoot", editedPersDTO.getlName());
+    }
+    
+    @Test
+    public void testEditPersonWithNonExistingId (){
+        int id = 100;
+        PersonDTO persDTO = new PersonDTO("Test","Testing","Tested");
+        persDTO.setId(id);
+        assertThrows(PersonNotFoundException.class,() -> facade.editPerson(persDTO));
+    }
+    
+    @Test
+    public void testEditPersonWithMissingInput() throws MissingInputException, PersonNotFoundException{
+        PersonDTO persDTO = facade.addPerson("first name", "lastName", "123321");
+        persDTO.setlName(null);
+        persDTO.setfName("Joe");
+        PersonDTO editedPersDTO = facade.editPerson(persDTO);
+        assertEquals("lastName", editedPersDTO.getlName());
+        assertEquals("Joe",editedPersDTO.getfName());
+        assertEquals("123321",editedPersDTO.getPhone());
+        
+    }
+    
     
 }

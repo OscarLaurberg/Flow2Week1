@@ -83,7 +83,7 @@ public class PersonFacade implements IPersonFacade {
 
         EntityManager em = emf.createEntityManager();
         try {
-            if (person.getFirstName() == null || person.getLastName() == null) {
+            if (person.getFirstName() == null || person.getLastName() == null || person.getFirstName().equals("") || person.getLastName().equals("")) {
                 throw new MissingInputException("First Name and/or Last Name is missing");
             }
             em.getTransaction().begin();
