@@ -59,7 +59,7 @@ public class PersonResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String addPerson(String json) throws MissingInputException{
         PersonDTO persDTO = GSON.fromJson(json, PersonDTO.class);
-        PersonDTO persistedPersDTO = FACADE.addPerson(persDTO.getfName(), persDTO.getlName(), persDTO.getPhone());
+        PersonDTO persistedPersDTO = FACADE.addPerson(persDTO.getfName(), persDTO.getlName(), persDTO.getPhone(), persDTO.getStreet(), persDTO.getCity(), persDTO.getZip());
         return GSON.toJson(persistedPersDTO);
     }
  

@@ -78,8 +78,8 @@ public class PersonFacade implements IPersonFacade {
     }
 
     @Override
-    public PersonDTO addPerson(String fName, String lName, String phone) throws MissingInputException {
-        Person person = new Person(fName, lName, phone);
+    public PersonDTO addPerson(String fName, String lName, String phone, String street, String city, String zip) throws MissingInputException {
+        Person person = new Person(fName, lName, phone, street, city, zip);
 
         EntityManager em = emf.createEntityManager();
         try {
@@ -127,6 +127,9 @@ public class PersonFacade implements IPersonFacade {
             }
             if (p.getPhone() != null) {
                 person.setPhone(p.getPhone());
+            }
+            if (p.getCity() != null && p.getStreet() != null && p.getZip() != null) {
+                person.setAddress(p.getStreet(),p.getZip(),p.getCity());
             }
             person.setLastEdited(new Date());
             em.getTransaction().commit();

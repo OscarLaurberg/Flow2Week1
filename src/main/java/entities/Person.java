@@ -2,18 +2,37 @@ package entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 
 @Entity
+@Table(name = "Person")
 @NamedQuery(name = "Person.deleteAllRows", query = "DELETE from Person")
 public class Person implements Serializable {
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+    
+    public void setAddress(String Street, String zip, String city){
+        address.setCity(city);
+        address.setStreet(Street);
+        address.setZip(zip);
+    }
     
     
     private static final long serialVersionUID = 1L;
@@ -27,6 +46,11 @@ public class Person implements Serializable {
     private Date created = new Date();
     @Temporal(TemporalType.DATE)
     private Date lastEdited = new Date();
+    
+    
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private Address address;
 
     public Person() {
 
@@ -37,6 +61,22 @@ public class Person implements Serializable {
         this.lastName = lastName;
         this.phone = phone;
     }
+
+    public Person(String firstName, String lastName, String phone, Address address) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.address = address;
+    }
+    
+      public Person(String firstName, String lastName, String phone, String street, String city, String zip) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.address = address;
+    }
+    
+    
 
     public Long getId() {
         return id;
