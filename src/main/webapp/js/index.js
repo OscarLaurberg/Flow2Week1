@@ -25,6 +25,10 @@ let options = {
 }
 
 fetch("api/Person/add",options);
+document.getElementById('fNameAdd').value = "";
+document.getElementById('lNameAdd').value = "";
+document.getElementById('phoneAdd').value = "";
+
 getAllPersons();
 }
 
